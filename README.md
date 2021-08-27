@@ -11,7 +11,8 @@ The repo contains three items:
   the assignment.
   
 2. CodeBook.md
-  This is the note describing the original data
+  This is the note describing data source and variables of the output dataset,
+  as well as the steps taken to clean and transform the data.
   
 3. run_analysis.R
   The R script that executes the data cleaning and transformation of the
