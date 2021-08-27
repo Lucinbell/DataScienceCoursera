@@ -14,6 +14,10 @@ A. Original Data:
 B. Variables:
 Variable 1 and 2 are "subject" and "activity" respectively, which indicates the
 volunteer from whom the data is recorded, and the activity they performed.
+The "subject" variable contains integer between 1 and 30, each associated with
+a volunteer performing the activities. The "activity" variable indicates the
+activity performed by the subject, which are "LAYING", "SITTING", "STANDING", 
+"WALKING", "WALKING_DOWNSTAIRS", AND "WALKING_UPSTAIRS".
 
 Variable 3~68 are means and standard deviation of the following features data:
   tBodyAcc-XYZ
