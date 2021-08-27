@@ -37,6 +37,12 @@ Variable 3~68 are means and standard deviation of the following features data:
   fBodyAccJerkMag
   fBodyGyroMag
   fBodyGyroJerkMag
+  
+NOTE: The key word filtering using 'grep' searched for variables with "mean()" 
+and "std()", and excludes variables containing ".meanFreq". In the features_info.txt
+file, the meanFreq() is described as the "weighted average of the frequency components
+to obtain a mean frequency", and is therefore a separate measures from mean() and std().
+The resulting analysis does not include the 13 variables containing meanFreq().
 
 The features labels (column names) are loaded from "./UCI HAR Dataset/features.txt" 
 and filtered for "mean()" and "std()". For more information on feature selection,
