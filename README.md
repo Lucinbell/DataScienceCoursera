@@ -19,7 +19,8 @@ The repo contains three items:
   assignment dataset: UHI HAR Dataset. The R script performs download, unzip,
   data merging, and calculation, with the final output of a .txt file.
   The script requires packages "dplyr" (for grouping and transforming data)
-  and "utils" (for unziping compressed file) to function.
+  and "utils" (for unziping compressed file) to function. For details on the
+  steps performed, please see CodeBook.md.
   
 Running "run_analysis.R":
 - To run the script, simply download the script to the working directory and
