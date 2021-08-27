@@ -73,7 +73,7 @@
 
   
 
-  write.table(output, file = "./tidy_averages.txt")
+  write.table(output, file = "./tidy_averages.txt", row.names = FALSE)
 
   
   
