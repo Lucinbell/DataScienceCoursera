@@ -1,0 +1,225 @@
+---
+title: "Practical machine Learning - Writeup"
+author: "Dylan"
+date: "2024-04-22"
+output: html_document
+---
+
+## Background and the Data
+
+Six participants were asked to perform one set of 10 reptitions of the Unilateral Bumbbell Biceps Curl in 5 different fashions
+
+\- A: exactly to specification
+
+\- B: throwing elbows to the front
+
+\- C: lifting dumbbell only half way
+
+\- D: lowering the dumbbell only halfway
+
+\- F: throwing the hips to the front
+
+Participants wore accelerometer sensors on four locations: arm, forearm, waist, and dumbbell. Sensor readings were recorded while the participants performed the activities at different specification, under supervision of experienced trainer, and labeled accordingly.
+
+Our goal is to train a model to identify the specific manner (`classe` A\~F) in which the participant did the exercise.
+
+### Selecting Features
+
+Model fitting will be done on portion of the `pml-training.csv` data. Quick look at the data set shows that some metadata like row number, participant name, time stamps, etc. are included in column 1\~7. Since they are not sensor readings, we will remove them from model fitting. Some columns also have class of `character`, which we will convert to numeric values.
+
+```{r load packages, message=FALSE, warning=FALSE}
+library(caret)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r load_data}
+pml_training <- read.csv(file.path(getwd(), "data", "pml-training.csv"))
+
+dim(pml_training)
+names(pml_training)[1:8]
+```
+
+Removing column 1\~7 and changing column classes
+
+```{r transform, warning=FALSE}
+# Transform training data
+pml_training <- pml_training %>%
+  select(-c(1:7)) %>%
+  mutate(
+    classe = as.factor(classe),
+    across(roll_belt:magnet_forearm_z, ~ as.numeric(.x))
+    )
+
+```
+
+Further exploration shows that there are quite a lot of missing values in the data set.
+
+```{r}
+col_na <- pml_training %>% 
+  summarize(across(everything(), ~ sum(is.na(.))))
+
+na_tab <- data.frame(
+  col_names = names(col_na),
+  na_count = as.numeric(col_na[1,])
+)
+
+na_tab <- na_tab %>%
+  mutate(
+    na_perc = na_count/nrow(pml_training)
+  ) %>%
+  arrange(desc(na_perc))
+
+na_summary <- na_tab %>% group_by(na_perc) %>%
+  summarize(feature_count = n()) %>%
+  mutate(na_perc_bracket = case_when(
+    na_perc >= 0.97 & na_perc < 0.98 ~ "0.97 ~ 0.979",
+    na_perc >= 0.98 & na_perc < 0.99 ~ "0.98 ~ 0.989",
+    na_perc >= 0.99 & na_perc < 0.99 ~ "0.99 ~ 0.999",
+    na_perc == 1 ~ "1",
+    na_perc == 0 ~ "0"
+  )) %>%
+  group_by(na_perc_bracket) %>%
+  summarize(
+    feature_count = sum(feature_count)
+  ) %>%
+  arrange(desc(na_perc_bracket))
+
+ggplot(na_summary, aes(na_perc_bracket, feature_count)) +
+  geom_col() +
+  geom_text(aes(label = feature_count), color = "white", nudge_y = -2.5) +
+  labs(
+    title = "Number of features with NAs",
+    x = "NA percent range",
+    y = "Count"
+  )
+```
+
+100 of the accelerometer related features contain more than 97% NA. Only 53 features have 0% NA.
+
+We will use only the features without missing values for modeling.
+
+```{r remove_na}
+# Filter for features with 0 NA
+select_col <- na_tab %>%
+  filter(na_perc == 0)
+
+# extract col names
+name_vec <- select_col$col_names
+
+# extract select columns
+pml_training_select <- pml_training %>%
+  select(one_of(name_vec))
+
+```
+
+## The Setup
+
+Now that we have chosen the features to fit the model, we further partition the data into testing and training set.
+
+```{r}
+set.seed(6525485) 
+# index 
+inTrain <- createDataPartition(y = pml_training_select$classe,                               p=0.75, list=FALSE) 
+# filter 
+training <- pml_training_select[inTrain,] 
+testing <- pml_training_select[-inTrain,]  
+dim(training); dim(testing) 
+```
+
+## Model Fitting
+
+We will use random forest to fit the model through the `caret` package. Random forest has the advantages of providing high accuracy, flexibility over non-linear data, while staying fairly robust to overfitting.
+
+### Training Specification
+
+First, we make some specifications to training control.
+
+We will expand tuning grid for `mtry` parameter beyond the default. Next, we specify the cross-validation control in the `trainControl()` function. We choose k = 5 fold for cross-validation because anything bigger than that will really inflate the computation time.
+
+```{r}
+myTuneGrid <- data.frame(
+  .mtry = c(5, 15, 25, 35, 45, 52)
+)
+
+myControl <- trainControl(
+  method = "cv",
+  number = 5,
+  verboseIter = FALSE
+)
+```
+
+### Fitting the Random Forest Model
+
+Now we are ready to fit the model using the specifications we have saved.
+
+```{r eval=FALSE, include=TRUE}
+# Takes quite a while to run...
+fit_rf_2 <- train(
+  classe ~.,
+  data = training,
+  method = "rf",
+  tuneGrid = myTuneGrid,
+  trControl = myControl
+)
+```
+
+```{r eval=TRUE, include = FALSE}
+# Load the locally saved model object
+fit_rf_2 <- readRDS("fit_rf_2.rds")
+```
+
+Let's take a look at the summary information on the model:
+
+```{r model_sum}
+fit_rf_2
+
+ggplot(fit_rf_2)
+```
+
+With k = 5 fold, the estimated out-of-sample accuracy for mtry = 5 is 0.9934775.
+
+Now we apply the model to the testing set to assess performance.
+
+```{r predict}
+# Using predict() on testing set
+pred_rf2_test <- predict(fit_rf_2, newdata = testing)
+
+# Confusion Matrix to assess
+confusionMatrix(testing$classe, pred_rf2_test)
+```
+
+The resulting accuracy rate is 0.9939, which is very close to accuracy on training set.
+
+## Predicting Quiz Cases
+
+Now to apply the method to the quiz cases.
+
+We will apply the same transformation and feature selection steps as we did in the training process.
+
+```{r quiz_setup}
+pml_test <- read.csv(file.path(getwd(), "data", "pml-testing.csv"))
+
+# Same for testing data
+pml_test <- pml_test %>%
+  # Remove meta data
+  select(-c(1:7)) %>%
+  mutate(
+    # transform data to numeric
+    across(roll_belt:magnet_forearm_z, ~ as.numeric(.x))
+    ) %>%
+  # Select non-NA features
+  select(problem_id, one_of(name_vec))
+```
+
+Using the quiz data set, apply the random forest model to get prediction for each problem ID case.
+
+```{r quiz_pred}
+# predict on pml_test
+quiz_df <- data.frame(
+  problem_id = pml_test$problem_id,
+  pred_classe = predict(fit_rf_2, newdata = pml_test)
+)
+
+quiz_df
+```
