@@ -1,0 +1,114 @@
+---
+title: "Data Product - Demo Presentation"
+author: "Dylan"
+date: "2024-04-29"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+```
+
+## R Markdown
+
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+## Slide with Bullets
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## Slide with R Output
+
+```{r cars, echo = TRUE}
+summary(cars)
+```
+
+## Slide with Plot
+
+```{r pressure}
+plot(pressure)
+```
+
+
+## My new slide
+
+What does the stuff say?
+
+**This is double**
+
+*This is single*
+
+
+### How about H3?
+
+What would it say?
+
+#### This is H4 subheading
+
+
+## My title
+
+- Bullet 1
+- Bullet 2
+
+1. Item a
+2. Item b
+3. Item c
+
+Let's see what it looks like.
+
+
+## Formatting Options
+
+*Italicized text*
+
+**Bold text**
+
+`Cold chunks for (i %in% 1:10)`
+`second line of code chunk`
+
+```
+Blocky code chunk
+line2
+3
+```
+
+
+## R Code that runs
+
+Take a look at code!
+`comment = ""` takes away the comment #
+
+```{r, comment = ""}
+head(mtcars)
+```
+
+
+## R code II
+
+Also, by default `echo = false`
+So if you want to show the code you'll have to specify.
+
+```{r}
+print("Hello Hal.")
+```
+
+Or you can remove the first few lines to default to `echo = TRUE`
+As well as specifying other options.
+
+## Slide: Plot
+
+```{r message=FALSE}
+require(ggplot2)
+ggplot(mtcars, aes(wt, mpg)) +
+  geom_point() +
+  labs(
+    xlab = "Weight",
+    xlab = "MPG"
+  )
+```
