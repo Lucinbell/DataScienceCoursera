@@ -1,0 +1,102 @@
+---
+title: "Developing Data Product - Week 3 Assignment"
+author: "Dylan"
+date: "2024-05-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+```
+
+
+## Instruction
+
+Create a web page presentation using R Markdown that features a plot created with Plotly. Host your webpage on either GitHub Pages, RPubs, or NeoCities. Your webpage must contain the date that you created the document, and it must contain a plot created with Plotly. We would love to see you show off your creativity! 
+
+
+Since this is only a simple demonstration, we will just use the built-in `mtcars`. It's not fancy but it'll get the job done. Will save the effort for final assignment.
+
+```{r data}
+data(mtcars)
+mtcars <- mtcars %>%
+  mutate(
+    cyl = as.factor(cyl),
+    vs = as.factor(if_else(vs == 0, "v-shaped", "straight")),
+    am = as.factor(if_else(am == 0, "automatic", "manual")),
+    gear = as.factor(gear)
+  )
+glimpse(mtcars)
+```
+
+## Simple Scatterplot
+
+First scatterplot: weight v. mile per gallon, color by number of cylinders.
+
+```{r scatt1}
+scatt1 <- plot_ly(data = mtcars,
+                  x = ~wt, y = ~mpg, color = ~cyl,
+                  type = "scatter", mode = "markers") %>%
+  layout(title = "Scatterplot 1: weight v. Miles per Gallon", legend = list(title = list(text = "Cylinders")))
+
+scatt1
+```
+
+
+Second scatterplot: horsepower v. qsec, size by displacement.
+
+```{r scatt2}
+scatt2 <- plot_ly(data = mtcars,
+                  x = ~hp, y = ~qsec, size = ~disp,
+                  type = "scatter", mode = "markers") %>%
+  layout(title = "Scatterplot 2: Horsepower v. Qsec", legend = list(title = list(text = "Displacement")))
+
+scatt2
+```
+
+
+
+## Simple Bar Chart
+
+Bar Chart 1: Average MPG by number of Cylinders
+
+```{r bar1}
+bar1 <- mtcars %>%
+  group_by(cyl) %>%
+  summarize(avg_mpg = mean(mpg),
+            avg_disp = mean(disp),
+            avg_hp = mean(hp)) %>%
+  plot_ly(x = ~cyl, y = ~avg_mpg,
+          type = "bar") %>%
+  layout(
+    title = "Average MPG by Number of Cylinders",
+    xaxis = list(title = "Number of Cylinders"),
+    yaxis = list(title = "Average MPG")
+  )
+
+bar1
+```
+
+
+Bar Chart 2: Average Displacement Volume by number of Cylinders
+
+```{r bar2}
+bar2 <- mtcars %>%
+  group_by(cyl) %>%
+  summarize(avg_mpg = mean(mpg),
+            avg_disp = mean(disp),
+            avg_hp = mean(hp)) %>%
+  plot_ly(x = ~cyl, y = ~avg_disp,
+          type = "bar") %>%
+  layout(
+    title = "Average DISP by Number of Cylinders",
+    xaxis = list(title = "Number of Cylinders"),
+    yaxis = list(title = "Average DISP")
+  )
+
+bar2
+```
+
