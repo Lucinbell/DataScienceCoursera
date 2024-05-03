@@ -1,0 +1,98 @@
+---
+title: "Developing Data Product - Week 3 Assignment"
+author: "Dylan"
+date: "2024-05-03"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+```
+
+```{r data}
+data(mtcars)
+mtcars <- mtcars %>%
+  mutate(
+    cyl = as.factor(cyl),
+    vs = as.factor(if_else(vs == 0, "v-shaped", "straight")),
+    am = as.factor(if_else(am == 0, "automatic", "manual")),
+    gear = as.factor(gear)
+  )
+```
+
+## Background
+
+Hi there! We'll just use the built-in `mtcars` data set that already comes with R.
+It's nothing fancy, but it gets the job done! Let's save the effort for the final assignment.
+
+- Hi I am bullet point 1
+- I contain no info
+- Just thought it's fancy
+- Also empty space makes me uncomfortable
+
+## Simple Scatterplot 1
+
+```{r scatt1}
+scatt1 <- plot_ly(data = mtcars,
+                  x = ~wt, y = ~mpg, color = ~cyl,
+                  type = "scatter", mode = "markers") %>%
+  layout(title = "Scatterplot 1: weight v. Miles per Gallon", legend = list(title = list(text = "Cylinders")))
+
+scatt1
+```
+
+## Simple Scatterplot 2
+
+```{r scatt2, warning=FALSE}
+scatt2 <- plot_ly(data = mtcars,
+                  x = ~hp, y = ~qsec, size = ~disp,
+                  type = "scatter", mode = "markers") %>%
+  layout(title = "Scatterplot 2: Horsepower v. Qsec", legend = list(title = list(text = "Displacement")))
+
+scatt2
+```
+
+## Simple Bar Chart 1
+
+```{r bar1}
+bar1 <- mtcars %>%
+  group_by(cyl) %>%
+  summarize(avg_mpg = mean(mpg),
+            avg_disp = mean(disp),
+            avg_hp = mean(hp)) %>%
+  plot_ly(x = ~cyl, y = ~avg_mpg,
+          type = "bar") %>%
+  layout(
+    title = "Average MPG by Number of Cylinders",
+    xaxis = list(title = "Number of Cylinders"),
+    yaxis = list(title = "Average MPG")
+  )
+
+bar1
+```
+
+## Simple Bar Chart 2
+
+```{r bar2}
+bar2 <- mtcars %>%
+  group_by(cyl) %>%
+  summarize(avg_mpg = mean(mpg),
+            avg_disp = mean(disp),
+            avg_hp = mean(hp)) %>%
+  plot_ly(x = ~cyl, y = ~avg_disp,
+          type = "bar") %>%
+  layout(
+    title = "Average DISP by Number of Cylinders",
+    xaxis = list(title = "Number of Cylinders"),
+    yaxis = list(title = "Average DISP")
+  )
+
+bar2
+```
+
+## That's it folks!
+
+We're done. Now close the browser and go get some sunlight outside. Or moonlight. Whenever you may be. Idk, don't let me tell you what to do. I am not your boss.
